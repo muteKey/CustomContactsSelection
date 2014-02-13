@@ -12,9 +12,17 @@
 
 @interface ViewController ()
 @property (nonatomic, strong) NSArray *contactsData;
+@property (nonatomic, strong) NSMutableSet *selectedPeople;
 @end
 
 @implementation ViewController
+
+- (NSMutableSet *) selectedPeople {
+    if (_selectedPeople == nil) {
+        _selectedPeople = [[NSMutableSet alloc] init];
+    }
+    return _selectedPeople;
+}
 
 - (void)viewDidLoad
 {
@@ -51,6 +59,7 @@
     return self.contactsData.count;
 }
 
+
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     static NSString *cellIdentifier = @"cellIdentifier";
@@ -59,8 +68,74 @@
     ABRecordRef person = (__bridge ABRecordRef)(self.contactsData[indexPath.row]);
     NSString *fullName = [self fullNameOfPerson: person];
     
+  
+
+
+    NSMutableDictionary *item = [self.contactsData objectAtIndex:indexPath.row];
+    [item setObject:cell forKey:@"cell"];
+    
+    BOOL checked = [[item objectForKey:@"checked"] boolValue];
+    UIImage *image = (checked) ? [UIImage imageNamed:@"checked"] : [UIImage imageNamed:@"unchecked"];
+    
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+    CGRect frame = CGRectMake(0.0, 0.0, image.size.width, image.size.height);
+    button.frame = frame;   // match the button's size with the image size
+    
+    [button setBackgroundImage:image forState:UIControlStateNormal];
+    
+    // set the button's target to this table view controller so we can interpret touch events and map that to a NSIndexSet
+    [button addTarget:self action:@selector(checkButtonTapped:event:) forControlEvents:UIControlEventTouchUpInside];
+    
+    cell.backgroundColor = [UIColor clearColor];
+    cell.accessoryView = button;
     cell.textLabel.text = fullName;
+    
     return cell;
+}
+
+
+#pragma mark - UITableViewDelegate
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [self tableView: self.tableView accessoryButtonTappedForRowWithIndexPath: indexPath];
+    [self.tableView deselectRowAtIndexPath:indexPath animated:YES];
+}
+
+- (void)checkButtonTapped:(id)sender event:(id)event
+{
+    NSSet *touches = [event allTouches];
+    UITouch *touch = [touches anyObject];
+    CGPoint currentTouchPosition = [touch locationInView:self.tableView];
+    
+    NSIndexPath *indexPath = [self.tableView indexPathForRowAtPoint: currentTouchPosition];
+    if (indexPath != nil)
+    {
+        [self tableView: self.tableView accessoryButtonTappedForRowWithIndexPath: indexPath];
+    }
+}
+
+- (void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath
+{
+    NSMutableDictionary *item = [self.contactsData objectAtIndex:indexPath.row];
+    
+    BOOL checked = [[item objectForKey:@"checked"] boolValue];
+    
+    [item setObject:[NSNumber numberWithBool:!checked] forKey:@"checked"];
+    
+    UITableViewCell *cell = [item objectForKey:@"cell"];
+    UIButton *button = (UIButton *)cell.accessoryView;
+    
+    UIImage *newImage = (checked) ? [UIImage imageNamed:@"unchecked"] : [UIImage imageNamed:@"checked"];
+    [button setBackgroundImage:newImage forState:UIControlStateNormal];
+    id person = [self.contactsData objectAtIndex:indexPath.row];
+    if (checked) {
+      
+        [self.selectedPeople addObject:person];
+    } else {
+        [self.selectedPeople removeObject:person];
+    }
+    NSLog(@"%@", self.selectedPeople);
 }
 
 
@@ -99,7 +174,12 @@
     }
     return fullName;
 }
+- (IBAction)doneButtonTapped:(id)sender {
+}
 
+
+- (IBAction)cancelButtonTapped:(id)sender {
+}
 
 
 

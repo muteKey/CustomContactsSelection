@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="4514" systemVersion="12F45" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" initialViewController="BQA-bd-wbS">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="4510" systemVersion="12F45" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" initialViewController="BQA-bd-wbS">
     <dependencies>
         <deployment defaultVersion="1536" identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="3747"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="3742"/>
     </dependencies>
     <scenes>
         <!--View Controller - Select contacts-->
@@ -37,9 +37,31 @@
                             <outlet property="delegate" destination="kNh-KO-cj2" id="ac0-Ji-U4x"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Select contacts" id="ujE-S8-9hT"/>
+                    <navigationItem key="navigationItem" title="Select contacts" id="ujE-S8-9hT">
+                        <barButtonItem key="leftBarButtonItem" title="Cancel" id="4hu-di-nFk">
+                            <connections>
+                                <action selector="cancelButtonTapped:" destination="kNh-KO-cj2" id="bfl-as-tLb"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem key="rightBarButtonItem" title="Done" id="2K3-0h-Mdd">
+                            <connections>
+                                <action selector="doneButtonTapped:" destination="kNh-KO-cj2" id="dLO-Dk-FCi"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                    <connections>
+                        <outlet property="searchDisplayController" destination="cWx-pr-bK7" id="CpU-pe-pWI"/>
+                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="hKf-gi-JAe" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <searchDisplayController id="cWx-pr-bK7">
+                    <connections>
+                        <outlet property="delegate" destination="kNh-KO-cj2" id="Zl0-eI-O5c"/>
+                        <outlet property="searchContentsController" destination="kNh-KO-cj2" id="MVG-9F-00o"/>
+                        <outlet property="searchResultsDataSource" destination="kNh-KO-cj2" id="WCZ-De-CCE"/>
+                        <outlet property="searchResultsDelegate" destination="kNh-KO-cj2" id="mew-eQ-LZU"/>
+                    </connections>
+                </searchDisplayController>
             </objects>
             <point key="canvasLocation" x="1161" y="62"/>
         </scene>
