@@ -21,7 +21,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="LZN-So-Zm3" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="635" y="62"/>
+            <point key="canvasLocation" x="367" y="42"/>
         </scene>
         <!--Custom Contacts Selection Controller - Select contacts-->
         <scene sceneID="MNv-3Q-I1Z">
@@ -70,7 +70,7 @@
                     </connections>
                 </searchDisplayController>
             </objects>
-            <point key="canvasLocation" x="1068" y="62"/>
+            <point key="canvasLocation" x="800" y="42"/>
         </scene>
     </scenes>
     <simulatedMetricsContainer key="defaultSimulatedMetrics">
