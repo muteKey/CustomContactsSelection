@@ -14,7 +14,6 @@
 		63A4466418ACF6880058B9E6 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 63A4466318ACF6880058B9E6 /* main.m */; };
 		63A4466818ACF6880058B9E6 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 63A4466718ACF6880058B9E6 /* AppDelegate.m */; };
 		63A4466B18ACF6880058B9E6 /* Main_iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 63A4466918ACF6880058B9E6 /* Main_iPhone.storyboard */; };
-		63A4467118ACF6880058B9E6 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63A4467018ACF6880058B9E6 /* ViewController.m */; };
 		63A4467318ACF6880058B9E6 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 63A4467218ACF6880058B9E6 /* Images.xcassets */; };
 		63A4467A18ACF6880058B9E6 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63A4467918ACF6880058B9E6 /* XCTest.framework */; };
 		63A4467B18ACF6880058B9E6 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63A4465718ACF6880058B9E6 /* Foundation.framework */; };
@@ -23,6 +22,7 @@
 		63A4468618ACF6880058B9E6 /* MultipleContactSelectionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 63A4468518ACF6880058B9E6 /* MultipleContactSelectionTests.m */; };
 		63A4469018ACF6A10058B9E6 /* AddressBook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63A4468F18ACF6A10058B9E6 /* AddressBook.framework */; };
 		63A4469218ACF6A60058B9E6 /* AddressBookUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63A4469118ACF6A60058B9E6 /* AddressBookUI.framework */; };
+		63A4469F18AD18C50058B9E6 /* CustomContactsSelectionController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63A4469E18AD18C50058B9E6 /* CustomContactsSelectionController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -47,8 +47,6 @@
 		63A4466618ACF6880058B9E6 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		63A4466718ACF6880058B9E6 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		63A4466A18ACF6880058B9E6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main_iPhone.storyboard; sourceTree = "<group>"; };
-		63A4466F18ACF6880058B9E6 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
-		63A4467018ACF6880058B9E6 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
 		63A4467218ACF6880058B9E6 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		63A4467818ACF6880058B9E6 /* MultipleContactSelectionTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MultipleContactSelectionTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		63A4467918ACF6880058B9E6 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
@@ -57,6 +55,8 @@
 		63A4468518ACF6880058B9E6 /* MultipleContactSelectionTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MultipleContactSelectionTests.m; sourceTree = "<group>"; };
 		63A4468F18ACF6A10058B9E6 /* AddressBook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBook.framework; path = System/Library/Frameworks/AddressBook.framework; sourceTree = SDKROOT; };
 		63A4469118ACF6A60058B9E6 /* AddressBookUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBookUI.framework; path = System/Library/Frameworks/AddressBookUI.framework; sourceTree = SDKROOT; };
+		63A4469D18AD18C50058B9E6 /* CustomContactsSelectionController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomContactsSelectionController.h; sourceTree = "<group>"; };
+		63A4469E18AD18C50058B9E6 /* CustomContactsSelectionController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomContactsSelectionController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -123,10 +123,10 @@
 				63A4466618ACF6880058B9E6 /* AppDelegate.h */,
 				63A4466718ACF6880058B9E6 /* AppDelegate.m */,
 				63A4466918ACF6880058B9E6 /* Main_iPhone.storyboard */,
-				63A4466F18ACF6880058B9E6 /* ViewController.h */,
-				63A4467018ACF6880058B9E6 /* ViewController.m */,
 				63A4467218ACF6880058B9E6 /* Images.xcassets */,
 				63A4465E18ACF6880058B9E6 /* Supporting Files */,
+				63A4469D18AD18C50058B9E6 /* CustomContactsSelectionController.h */,
+				63A4469E18AD18C50058B9E6 /* CustomContactsSelectionController.m */,
 			);
 			path = MultipleContactSelection;
 			sourceTree = "<group>";
@@ -257,8 +257,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				63A4467118ACF6880058B9E6 /* ViewController.m in Sources */,
 				63A4466818ACF6880058B9E6 /* AppDelegate.m in Sources */,
+				63A4469F18AD18C50058B9E6 /* CustomContactsSelectionController.m in Sources */,
 				63A4466418ACF6880058B9E6 /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

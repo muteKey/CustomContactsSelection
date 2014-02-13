@@ -1,5 +1,5 @@
 //
-//  ViewController.h
+//  CustomContactsSelectionController.h
 //  MultipleContactSelection
 //
 //  Created by Kirill on 2/13/14.
@@ -8,6 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-@interface ViewController : UITableViewController
+@interface CustomContactsSelectionController : UITableViewController
 
 @end
