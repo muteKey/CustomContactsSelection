@@ -46,19 +46,51 @@
         {
             CFArrayRef people = ABAddressBookCopyArrayOfAllPeople(addressBook);
             self.contactsData = (__bridge NSArray*)people;
-            
+            [self sortContactsArray];
+
             [self.tableView reloadData];
         }
     };
     
     ABAddressBookRequestAccessWithCompletion(addressBook,  completionHandler);
 
+    [self addNavigationItems];
 }
 
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+#pragma mark - UI actions -
+
+- (void)addNavigationItems
+{
+    self.navigationController.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
+                                                                                                                target: self
+                                                                                                                action: @selector(doneTapped)];
+    
+    self.navigationController.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel
+                                                                                                               target:self
+                                                                                                               action:@selector(cancelTapped)];
+}
+
+- (void)doneTapped
+{
+    if (self.completionBlock)
+    {
+        self.completionBlock(self.selectedContactsData);
+    }
+    
+//    [self dismissViewControllerAnimated: YES
+//                             completion: nil];
+}
+
+- (void)cancelTapped
+{
+//    [self dismissViewControllerAnimated: YES
+//                             completion: nil];
 }
 
 #pragma mark - UitableViewDataSource -
@@ -102,6 +134,16 @@
     cell.textLabel.text = fullName;
 
     return cell;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    id personObject = self.contactsData[indexPath.row];
+    
+    if (![self.selectedContactsData containsObject: personObject])
+    {
+        [self.selectedContactsData addObject: personObject];
+    }
 }
 
 
@@ -182,6 +224,21 @@
         }
     }
     return fullName;
+}
+
+- (void)sortContactsArray
+{
+    self.contactsData = [self.contactsData sortedArrayUsingComparator: ^NSComparisonResult(id obj1, id obj2) {
+        
+                            ABRecordRef person1 = (__bridge ABRecordRef)(obj1);
+                            ABRecordRef person2 = (__bridge ABRecordRef)(obj2);
+                            
+                            NSString *firstSurname  = (__bridge_transfer NSString*)ABRecordCopyValue(person1, kABPersonLastNameProperty);
+                            NSString *secondSurname = (__bridge_transfer NSString*)ABRecordCopyValue(person2, kABPersonLastNameProperty);
+                            
+                            return [firstSurname compare: secondSurname];
+        
+                        }];
 }
 
 @end
