@@ -15,6 +15,7 @@
 @property (nonatomic, strong) NSArray        *contactsData;
 @property (nonatomic, strong) NSMutableArray *filteredContactsData;
 @property (nonatomic, strong) NSMutableArray *selectedContactsData;
+@property (nonatomic, strong) NSMutableDictionary *items;
 
 @end
 
@@ -32,11 +33,11 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
+    self.items  = [NSMutableDictionary new];
     self.searchDisplayController.delegate                = self;
     self.searchDisplayController.searchResultsDataSource = self;
     self.searchDisplayController.searchResultsDelegate   = self;
-   
+    
     CFErrorRef errorRef;
     ABAddressBookRef addressBook = ABAddressBookCreateWithOptions(NULL, &errorRef);
     
@@ -47,13 +48,13 @@
             CFArrayRef people = ABAddressBookCopyArrayOfAllPeople(addressBook);
             self.contactsData = (__bridge NSArray*)people;
             [self sortContactsArray];
-
+            
             [self.tableView reloadData];
         }
     };
     
     ABAddressBookRequestAccessWithCompletion(addressBook,  completionHandler);
-
+    
     [self addNavigationItems];
 }
 
@@ -67,23 +68,23 @@
 - (void)addNavigationItems
 {
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
-                                                                                                                target: self
-                                                                                                                action: @selector(doneTapped)];
+                                                                                           target: self
+                                                                                           action: @selector(doneTapped)];
     
     self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel
-                                                                                                               target:self
-                                                                                                               action:@selector(cancelTapped)];
+                                                                                          target:self
+                                                                                          action:@selector(cancelTapped)];
 }
 
 - (void)doneTapped
 {
     if ([self.delegate respondsToSelector: @selector( didFinishSelectingContacts: )])
     {
-        [self.delegate didFinishSelectingContacts: self.selectedContactsData];        
+        [self.delegate didFinishSelectingContacts: self.selectedContactsData];
     }
-
-//    [self dismissViewControllerAnimated: YES
-//                             completion: nil];
+    
+    //    [self dismissViewControllerAnimated: YES
+    //                             completion: nil];
 }
 
 - (void)cancelTapped
@@ -94,8 +95,8 @@
         [self.delegate didCancelSelection];
     }
     
-//    [self dismissViewControllerAnimated: YES
-//                             completion: nil];
+    //    [self dismissViewControllerAnimated: YES
+    //                             completion: nil];
 }
 
 #pragma mark - UitableViewDataSource -
@@ -123,39 +124,102 @@
         cell = [[UITableViewCell alloc] initWithStyle: UITableViewCellStyleDefault
                                       reuseIdentifier: cellIdentifier];
     }
-    
+    ABRecordRef person;
     if (tableView == self.tableView)
     {
-        ABRecordRef person = (__bridge ABRecordRef)(self.contactsData[indexPath.row]);
-        NSString *fullName = [self fullNameOfPerson: person];
-
-        cell.textLabel.text = fullName;
-        return cell;
+        person = (__bridge ABRecordRef)(self.contactsData[indexPath.row]);
+        
+        
+    }
+    else {
+        person = (__bridge ABRecordRef)(self.filteredContactsData[indexPath.row]);
+        
     }
     
-    ABRecordRef person = (__bridge ABRecordRef)(self.filteredContactsData[indexPath.row]);
     NSString *fullName = [self fullNameOfPerson: person];
-    
     cell.textLabel.text = fullName;
-
+    NSString *key = [NSString stringWithFormat:@"%@ %d",fullName,indexPath.row];
+    BOOL checked = [self.items[key] boolValue];
+    UIImage *image = (checked) ? [UIImage imageNamed:@"checked"] : [UIImage imageNamed:@"unchecked"];
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+    CGRect frame = CGRectMake(0.0, 0.0, 30, 30);
+    button.frame = frame;
+    
+    [button setBackgroundImage:image forState:UIControlStateNormal];
+    
+    // set the button's target so we can interpret touch events and map that to a NSIndexSet
+    [button addTarget:self action:@selector(checkButtonTapped:event:) forControlEvents:UIControlEventTouchUpInside];
+    
+    cell.backgroundColor = [UIColor clearColor];
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    cell.accessoryView = button;
+    
     return cell;
 }
+#pragma mark - UITableViewDelegate
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    id personObject = self.contactsData[indexPath.row];
+    [self tableView:tableView accessoryButtonTappedForRowWithIndexPath: indexPath];
+    [self.tableView deselectRowAtIndexPath:indexPath animated:YES];
+}
+
+- (void)checkButtonTapped:(id)sender event:(id)event
+{
+    NSSet *touches = [event allTouches];
+    UITouch *touch = [touches anyObject];
+    CGPoint currentTouchPosition = [touch locationInView:self.tableView];
     
-    if (![self.selectedContactsData containsObject: personObject])
+    NSIndexPath *indexPath = [self.tableView indexPathForRowAtPoint: currentTouchPosition];
+    if (indexPath != nil)
     {
-        [self.selectedContactsData addObject: personObject];
+        [self tableView: self.tableView accessoryButtonTappedForRowWithIndexPath: indexPath];
     }
 }
+
+- (void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath
+{
+  
+    UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
+    NSString *key =cell.textLabel.text;
+    NSLog(@"key=%@",key);
+    BOOL checked = [self.items[key] boolValue];
+    self.items[key] = @(!checked);
+    
+    
+    UIButton *button = (UIButton *)cell.accessoryView;
+    
+    UIImage *newImage = (checked) ? [UIImage imageNamed:@"unchecked"] : [UIImage imageNamed:@"checked"];
+    
+    [button setBackgroundImage:newImage forState:UIControlStateNormal];
+    
+    id person  = nil;
+    if (tableView == self.tableView)
+    {
+        person = self.contactsData[indexPath.row];
+        
+        
+    }
+    else {
+        person = self.filteredContactsData[indexPath.row];
+        
+    }
+    
+    if (!checked) {
+        
+        [self.selectedContactsData addObject:person];
+    } else {
+        [self.selectedContactsData removeObject:person];
+    }
+
+}
+
 
 
 #pragma mark - UISearchDisplayDelegate -
 
 -(BOOL)searchDisplayController:       (UISearchDisplayController *)controller
-    shouldReloadTableForSearchString: (NSString *)searchString
+shouldReloadTableForSearchString: (NSString *)searchString
 {
     [self.filteredContactsData removeAllObjects];
     for (id personObject in self.contactsData)
@@ -236,15 +300,14 @@
 {
     self.contactsData = [self.contactsData sortedArrayUsingComparator: ^NSComparisonResult(id obj1, id obj2) {
         
-                            ABRecordRef person1 = (__bridge ABRecordRef)(obj1);
-                            ABRecordRef person2 = (__bridge ABRecordRef)(obj2);
-                            
-                            NSString *firstSurname  = (__bridge_transfer NSString*)ABRecordCopyValue(person1, kABPersonLastNameProperty);
-                            NSString *secondSurname = (__bridge_transfer NSString*)ABRecordCopyValue(person2, kABPersonLastNameProperty);
-                            
-                            return [firstSurname compare: secondSurname];
+        ABRecordRef person1 = (__bridge ABRecordRef)(obj1);
+        ABRecordRef person2 = (__bridge ABRecordRef)(obj2);
         
-                        }];
+        NSString *firstSurname  = (__bridge_transfer NSString*)ABRecordCopyValue(person1, kABPersonLastNameProperty);
+        NSString *secondSurname = (__bridge_transfer NSString*)ABRecordCopyValue(person2, kABPersonLastNameProperty);
+        return [firstSurname compare: secondSurname];
+        
+    }];
 }
 
 @end
