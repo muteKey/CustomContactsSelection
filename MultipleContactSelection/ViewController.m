@@ -13,6 +13,7 @@
 @interface ViewController ()
 @property (nonatomic, strong) NSArray *contactsData;
 @property (nonatomic, strong) NSMutableSet *selectedPeople;
+@property (nonatomic, strong) NSMutableDictionary *items;
 @end
 
 @implementation ViewController
@@ -27,23 +28,25 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
+    self.items  = [NSMutableDictionary new];
     CFErrorRef errorRef;
     ABAddressBookRef addressBook = ABAddressBookCreateWithOptions(NULL, &errorRef);
     
     ABAddressBookRequestAccessCompletionHandler completionHandler = ^(bool granted, CFErrorRef error) {
-
-                                            if (granted)
-                                            {
-                                                CFArrayRef people = ABAddressBookCopyArrayOfAllPeople(addressBook);
-                                                self.contactsData = (__bridge NSArray*)people;
-                                                
-                                                NSLog(@"Contact object: %@", [self.contactsData.firstObject class]);
-                                                [self.tableView reloadData];
-                                            }
+        
+        if (granted)
+        {
+            CFArrayRef people = ABAddressBookCopyArrayOfAllPeople(addressBook);
+            self.contactsData = (__bridge NSArray*)people;
+            
+        }
     };
     
     ABAddressBookRequestAccessWithCompletion(addressBook,  completionHandler);
+    [self.tableView reloadData];
+}
+- (void) viewWillAppear:(BOOL)animated {
+    [self.tableView reloadData];
 }
 
 - (void)didReceiveMemoryWarning
@@ -67,26 +70,23 @@
     
     ABRecordRef person = (__bridge ABRecordRef)(self.contactsData[indexPath.row]);
     NSString *fullName = [self fullNameOfPerson: person];
+    NSString *key = [NSString stringWithFormat:@"%d",indexPath.row];
+    BOOL checked = [self.items[key] boolValue];
     
-  
-
-
-    NSMutableDictionary *item = [self.contactsData objectAtIndex:indexPath.row];
-    [item setObject:cell forKey:@"cell"];
-    
-    BOOL checked = [[item objectForKey:@"checked"] boolValue];
     UIImage *image = (checked) ? [UIImage imageNamed:@"checked"] : [UIImage imageNamed:@"unchecked"];
     
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-    CGRect frame = CGRectMake(0.0, 0.0, image.size.width, image.size.height);
-    button.frame = frame;   // match the button's size with the image size
+    CGRect frame = CGRectMake(0.0, 0.0, 30, 30);
+    button.frame = frame;   
     
     [button setBackgroundImage:image forState:UIControlStateNormal];
     
-    // set the button's target to this table view controller so we can interpret touch events and map that to a NSIndexSet
+    // set the button's target so we can interpret touch events and map that to a NSIndexSet
     [button addTarget:self action:@selector(checkButtonTapped:event:) forControlEvents:UIControlEventTouchUpInside];
     
+    
     cell.backgroundColor = [UIColor clearColor];
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
     cell.accessoryView = button;
     cell.textLabel.text = fullName;
     
@@ -117,24 +117,29 @@
 
 - (void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath
 {
-    NSMutableDictionary *item = [self.contactsData objectAtIndex:indexPath.row];
     
-    BOOL checked = [[item objectForKey:@"checked"] boolValue];
     
-    [item setObject:[NSNumber numberWithBool:!checked] forKey:@"checked"];
+    NSString *key = [NSString stringWithFormat:@"%d",indexPath.row];
     
-    UITableViewCell *cell = [item objectForKey:@"cell"];
+    BOOL checked = [self.items[key] boolValue];
+    self.items[key] = @(!checked);
+    
+    UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
     UIButton *button = (UIButton *)cell.accessoryView;
     
     UIImage *newImage = (checked) ? [UIImage imageNamed:@"unchecked"] : [UIImage imageNamed:@"checked"];
+    
     [button setBackgroundImage:newImage forState:UIControlStateNormal];
+    
     id person = [self.contactsData objectAtIndex:indexPath.row];
-    if (checked) {
-      
+    
+    if (!checked) {
+        
         [self.selectedPeople addObject:person];
     } else {
         [self.selectedPeople removeObject:person];
     }
+    
     NSLog(@"%@", self.selectedPeople);
 }
 
