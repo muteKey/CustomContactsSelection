@@ -60,35 +60,40 @@
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
 }
 
 #pragma mark - UI actions -
 
 - (void)addNavigationItems
 {
-    self.navigationController.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
                                                                                                                 target: self
                                                                                                                 action: @selector(doneTapped)];
     
-    self.navigationController.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel
+    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel
                                                                                                                target:self
                                                                                                                action:@selector(cancelTapped)];
 }
 
 - (void)doneTapped
 {
-    if (self.completionBlock)
+    if ([self.delegate respondsToSelector: @selector( didFinishSelectingContacts: )])
     {
-        self.completionBlock(self.selectedContactsData);
+        [self.delegate didFinishSelectingContacts: self.selectedContactsData];        
     }
-    
+
 //    [self dismissViewControllerAnimated: YES
 //                             completion: nil];
 }
 
 - (void)cancelTapped
 {
+    
+    if ([self.delegate respondsToSelector:@selector( didCancelSelection )])
+    {
+        [self.delegate didCancelSelection];
+    }
+    
 //    [self dismissViewControllerAnimated: YES
 //                             completion: nil];
 }
@@ -148,6 +153,7 @@
 
 
 #pragma mark - UISearchDisplayDelegate -
+
 -(BOOL)searchDisplayController:       (UISearchDisplayController *)controller
     shouldReloadTableForSearchString: (NSString *)searchString
 {
