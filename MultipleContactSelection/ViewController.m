@@ -28,7 +28,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    self.items  = [NSMutableDictionary new];
+   
     CFErrorRef errorRef;
     ABAddressBookRef addressBook = ABAddressBookCreateWithOptions(NULL, &errorRef);
     
@@ -70,24 +70,9 @@
     
     ABRecordRef person = (__bridge ABRecordRef)(self.contactsData[indexPath.row]);
     NSString *fullName = [self fullNameOfPerson: person];
-    NSString *key = [NSString stringWithFormat:@"%d",indexPath.row];
-    BOOL checked = [self.items[key] boolValue];
-    
-    UIImage *image = (checked) ? [UIImage imageNamed:@"checked"] : [UIImage imageNamed:@"unchecked"];
-    
-    UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-    CGRect frame = CGRectMake(0.0, 0.0, 30, 30);
-    button.frame = frame;   
-    
-    [button setBackgroundImage:image forState:UIControlStateNormal];
-    
-    // set the button's target so we can interpret touch events and map that to a NSIndexSet
-    [button addTarget:self action:@selector(checkButtonTapped:event:) forControlEvents:UIControlEventTouchUpInside];
     
     
-    cell.backgroundColor = [UIColor clearColor];
-    cell.selectionStyle = UITableViewCellSelectionStyleNone;
-    cell.accessoryView = button;
+   
     cell.textLabel.text = fullName;
     
     return cell;
