@@ -16,7 +16,7 @@
 @property (nonatomic, strong) NSMutableArray *filteredContactsData;
 @property (nonatomic, strong) NSMutableArray *selectedContactsData;
 @property (nonatomic, strong) NSMutableDictionary *items;
-
+@property (nonatomic) ABAddressBookRef addressBook;
 @end
 
 @implementation CustomContactsSelectionController
@@ -24,11 +24,13 @@
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self) {
-        // Custom initialization
+    if (self)
+    {
     }
     return self;
 }
+
+
 
 - (void)viewDidLoad
 {
@@ -38,24 +40,26 @@
     self.searchDisplayController.searchResultsDataSource = self;
     self.searchDisplayController.searchResultsDelegate   = self;
     
+    [self addNavigationItems];
+    
     CFErrorRef errorRef;
-    ABAddressBookRef addressBook = ABAddressBookCreateWithOptions(NULL, &errorRef);
+    self.addressBook = ABAddressBookCreateWithOptions(NULL, &errorRef);
     
     ABAddressBookRequestAccessCompletionHandler completionHandler = ^(bool granted, CFErrorRef error) {
         
         if (granted)
         {
-            CFArrayRef people = ABAddressBookCopyArrayOfAllPeople(addressBook);
-            self.contactsData = (__bridge NSArray*)people;
-            [self sortContactsArray];
-            
-            [self.tableView reloadData];
+            [self requestData];
         }
     };
     
-    ABAddressBookRequestAccessWithCompletion(addressBook,  completionHandler);
+    ABAddressBookRequestAccessWithCompletion(self.addressBook,  completionHandler);
+
     
-    [self addNavigationItems];
+    [[NSNotificationCenter defaultCenter] addObserver: self
+                                             selector: @selector(appDidBecomeActive)
+                                                 name: UIApplicationDidBecomeActiveNotification
+                                               object: nil];
 }
 
 - (void)didReceiveMemoryWarning
@@ -128,27 +132,29 @@
     if (tableView == self.tableView)
     {
         person = (__bridge ABRecordRef)(self.contactsData[indexPath.row]);
-        
-        
     }
-    else {
+    else
+    {
         person = (__bridge ABRecordRef)(self.filteredContactsData[indexPath.row]);
-        
     }
     
     NSString *fullName = [self fullNameOfPerson: person];
     cell.textLabel.text = fullName;
-    NSString *key = [NSString stringWithFormat:@"%@ %d",fullName,indexPath.row];
-    BOOL checked = [self.items[key] boolValue];
-    UIImage *image = (checked) ? [UIImage imageNamed:@"checked"] : [UIImage imageNamed:@"unchecked"];
+
+    BOOL isChecked = [self.selectedContactsData containsObject: (__bridge id)(person)];
+    UIImage *image = isChecked ? [UIImage imageNamed:@"checked"] : nil;
+    
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
     CGRect frame = CGRectMake(0.0, 0.0, 30, 30);
     button.frame = frame;
     
-    [button setBackgroundImage:image forState:UIControlStateNormal];
+    [button setBackgroundImage: image
+                      forState: UIControlStateNormal];
     
     // set the button's target so we can interpret touch events and map that to a NSIndexSet
-    [button addTarget:self action:@selector(checkButtonTapped:event:) forControlEvents:UIControlEventTouchUpInside];
+    [button addTarget: self
+               action: @selector( checkButtonTapped: event: )
+     forControlEvents: UIControlEventTouchUpInside];
     
     cell.backgroundColor = [UIColor clearColor];
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
@@ -156,6 +162,7 @@
     
     return cell;
 }
+
 #pragma mark - UITableViewDelegate
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
@@ -206,7 +213,6 @@
     }
     
     if (!checked) {
-        
         [self.selectedContactsData addObject:person];
     } else {
         [self.selectedContactsData removeObject:person];
@@ -227,7 +233,8 @@ shouldReloadTableForSearchString: (NSString *)searchString
         ABRecordRef person = (__bridge ABRecordRef)(personObject);
         NSString* fullName = [self fullNameOfPerson: person];
         
-        if ([fullName rangeOfString: searchString].location != NSNotFound)
+        if ([fullName rangeOfString: searchString
+                            options: NSCaseInsensitiveSearch].location != NSNotFound)
         {
             [self.filteredContactsData addObject: personObject];
         }
@@ -256,6 +263,17 @@ shouldReloadTableForSearchString: (NSString *)searchString
     }
     
     return _selectedContactsData;
+}
+
+#pragma mark - Data requesting -
+
+- (void)requestData
+{
+    CFArrayRef people = ABAddressBookCopyArrayOfAllPeople(self.addressBook);
+    self.contactsData = (__bridge NSArray*)people;
+    [self sortContactsArray];
+    
+    [self.tableView reloadData];
 }
 
 #pragma mark - Helpers -
@@ -308,6 +326,13 @@ shouldReloadTableForSearchString: (NSString *)searchString
         return [firstSurname compare: secondSurname];
         
     }];
+}
+
+#pragma mark - Notifications reaction -
+
+- (void)appDidBecomeActive
+{
+    [self requestData];
 }
 
 @end

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		639CCC1718AE03BE00732D27 /* checked.png in Resources */ = {isa = PBXBuildFile; fileRef = 639CCC1618AE03BE00732D27 /* checked.png */; };
 		63A4465818ACF6880058B9E6 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63A4465718ACF6880058B9E6 /* Foundation.framework */; };
 		63A4465A18ACF6880058B9E6 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63A4465918ACF6880058B9E6 /* CoreGraphics.framework */; };
 		63A4465C18ACF6880058B9E6 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63A4465B18ACF6880058B9E6 /* UIKit.framework */; };
@@ -36,6 +37,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		639CCC1618AE03BE00732D27 /* checked.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = checked.png; sourceTree = "<group>"; };
 		63A4465418ACF6880058B9E6 /* MultipleContactSelection.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MultipleContactSelection.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		63A4465718ACF6880058B9E6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		63A4465918ACF6880058B9E6 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -120,6 +122,7 @@
 		63A4465D18ACF6880058B9E6 /* MultipleContactSelection */ = {
 			isa = PBXGroup;
 			children = (
+				639CCC1618AE03BE00732D27 /* checked.png */,
 				63A4466618ACF6880058B9E6 /* AppDelegate.h */,
 				63A4466718ACF6880058B9E6 /* AppDelegate.m */,
 				63A4466918ACF6880058B9E6 /* Main_iPhone.storyboard */,
@@ -237,6 +240,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				63A4467318ACF6880058B9E6 /* Images.xcassets in Resources */,
+				639CCC1718AE03BE00732D27 /* checked.png in Resources */,
 				63A4466B18ACF6880058B9E6 /* Main_iPhone.storyboard in Resources */,
 				63A4466218ACF6880058B9E6 /* InfoPlist.strings in Resources */,
 			);
@@ -474,6 +478,7 @@
 				63A4468B18ACF6880058B9E6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		63A4468C18ACF6880058B9E6 /* Build configuration list for PBXNativeTarget "MultipleContactSelectionTests" */ = {
 			isa = XCConfigurationList;
@@ -482,6 +487,7 @@
 				63A4468E18ACF6880058B9E6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
