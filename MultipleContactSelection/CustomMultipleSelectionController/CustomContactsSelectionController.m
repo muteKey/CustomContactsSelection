@@ -7,30 +7,30 @@
 //
 
 #import "CustomContactsSelectionController.h"
-#import <AddressBookUI/AddressBookUI.h>
-#import <AddressBook/AddressBook.h>
 
-@interface CustomContactsSelectionController ()<UISearchDisplayDelegate>
+@interface CustomContactsSelectionController ()<UISearchDisplayDelegate, UITableViewDelegate, UITableViewDataSource>
 
 @property (nonatomic, strong) NSArray        *contactsData;
 @property (nonatomic, strong) NSMutableArray *filteredContactsData;
 @property (nonatomic, strong) NSMutableArray *selectedContactsData;
 @property (nonatomic, strong) NSMutableDictionary *items;
 @property (nonatomic) ABAddressBookRef addressBook;
+
+@property (strong, nonatomic) IBOutlet UITableView *tableView;
+
 @end
 
 @implementation CustomContactsSelectionController
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+- (id)init
 {
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self)
+    if (self = [super initWithNibName: NSStringFromClass(self.class)
+                               bundle: nil])
     {
     }
+    
     return self;
 }
-
-
 
 - (void)viewDidLoad
 {
@@ -60,7 +60,10 @@
                                              selector: @selector(appDidBecomeActive)
                                                  name: UIApplicationDidBecomeActiveNotification
                                                object: nil];
+    
+    [self adjustUI];
 }
+
 
 - (void)didReceiveMemoryWarning
 {
@@ -82,25 +85,32 @@
 
 - (void)doneTapped
 {
-    if ([self.delegate respondsToSelector: @selector( didFinishSelectingContacts: )])
+    if (self.selectionCompletionBlock)
     {
-        [self.delegate didFinishSelectingContacts: self.selectedContactsData];
+        self.selectionCompletionBlock(self.selectedContactsData);
     }
     
-    //    [self dismissViewControllerAnimated: YES
-    //                             completion: nil];
+    [self dismissViewControllerAnimated: YES
+                             completion: nil];
 }
 
 - (void)cancelTapped
 {
-    
-    if ([self.delegate respondsToSelector:@selector( didCancelSelection )])
+    if (self.selectionCancelBlock)
     {
-        [self.delegate didCancelSelection];
+        self.selectionCancelBlock();
     }
     
-    //    [self dismissViewControllerAnimated: YES
-    //                             completion: nil];
+    [self dismissViewControllerAnimated: YES
+                             completion: nil];
+}
+
+- (void)adjustUI
+{
+    if (!self.selectionImage)
+    {
+        self.selectionImage = [UIImage imageNamed:@"defaultSelectionImage.png"];
+    }
 }
 
 #pragma mark - UitableViewDataSource -
@@ -142,7 +152,7 @@
     cell.textLabel.text = fullName;
 
     BOOL isChecked = [self.selectedContactsData containsObject: (__bridge id)(person)];
-    UIImage *image = isChecked ? [UIImage imageNamed:@"checked"] : nil;
+    UIImage *image = isChecked ? self.selectionImage : nil;
     
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
     CGRect frame = CGRectMake(0.0, 0.0, 30, 30);
@@ -186,17 +196,15 @@
 
 - (void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath
 {
-  
     UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
-    NSString *key =cell.textLabel.text;
-    NSLog(@"key=%@",key);
+    NSString *key = cell.textLabel.text;
     BOOL checked = [self.items[key] boolValue];
     self.items[key] = @(!checked);
     
     
     UIButton *button = (UIButton *)cell.accessoryView;
     
-    UIImage *newImage = (checked) ? [UIImage imageNamed:@"unchecked"] : [UIImage imageNamed:@"checked"];
+    UIImage *newImage = (checked) ? [UIImage imageNamed:@"unchecked"] : self.selectionImage;
     
     [button setBackgroundImage:newImage forState:UIControlStateNormal];
     
@@ -204,17 +212,18 @@
     if (tableView == self.tableView)
     {
         person = self.contactsData[indexPath.row];
-        
-        
     }
-    else {
+    else
+    {
         person = self.filteredContactsData[indexPath.row];
-        
     }
     
-    if (!checked) {
+    if (!checked)
+    {
         [self.selectedContactsData addObject:person];
-    } else {
+    }
+    else
+    {
         [self.selectedContactsData removeObject:person];
     }
 
