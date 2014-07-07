@@ -2,8 +2,9 @@
 ========================
 This is class for custom multiple contacts selection from address book. You can specify selection completion block and cancel block. You need to **embed selection controller into navigation controller** to make things work properly. 
 
-`    CustomContactsSelectionController* contactsSelectionVC = [[CustomContactsSelectionController alloc] init];
-    contactsSelectionVC.selectionCompletionBlock = ^(NSArray* selectedContacts){
+`    
+	CustomContactsSelectionController* contactsSelectionVC =	 [[CustomContactsSelectionController alloc] init];
+    	contactsSelectionVC.selectionCompletionBlock = ^(NSArray* selectedContacts){
         NSLog(@"You have selected:\n");
         
         [selectedContacts enumerateObjectsUsingBlock:^(id personObject, NSUInteger idx, BOOL *stop) {
@@ -29,7 +30,4 @@ This is class for custom multiple contacts selection from address book. You can 
 
     [self presentViewController: navController
                        animated: YES
-                     completion: nil];
-`
-
-=======================
+                     completion: nil]; `
