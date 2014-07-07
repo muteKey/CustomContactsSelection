@@ -72,6 +72,14 @@
 
 #pragma mark - UI actions -
 
+- (void)setSelectionImage:(UIImage *)selectionImage
+{
+    if (selectionImage)
+    {
+        self.selectionImage = selectionImage;
+    }
+}
+
 - (void)addNavigationItems
 {
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
