@@ -30,4 +30,4 @@ This is class for custom multiple contacts selection from address book. You can 
 
     [self presentViewController: navController
                        animated: YES
-                     completion: nil]; `
+                     completion: nil];
