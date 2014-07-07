@@ -8,7 +8,9 @@
 
 #import "CustomContactsSelectionController.h"
 
-@interface CustomContactsSelectionController ()<UISearchDisplayDelegate, UITableViewDelegate, UITableViewDataSource>
+static   NSString * kNoNameString = nil;
+
+@interface CustomContactsSelectionController ()<UISearchBarDelegate, UITableViewDelegate, UITableViewDataSource>
 
 @property (nonatomic, strong) NSArray        *contactsData;
 @property (nonatomic, strong) NSMutableArray *filteredContactsData;
@@ -17,6 +19,7 @@
 @property (nonatomic) ABAddressBookRef addressBook;
 
 @property (strong, nonatomic) IBOutlet UITableView *tableView;
+@property (strong, nonatomic) IBOutlet UISearchBar *searchBar;
 
 @end
 
@@ -36,13 +39,12 @@
 {
     [super viewDidLoad];
     self.items  = [NSMutableDictionary new];
-    self.searchDisplayController.delegate                = self;
-    self.searchDisplayController.searchResultsDataSource = self;
-    self.searchDisplayController.searchResultsDelegate   = self;
+    
     
     [self addNavigationItems];
     
     CFErrorRef errorRef;
+    
     self.addressBook = ABAddressBookCreateWithOptions(NULL, &errorRef);
     
     ABAddressBookRequestAccessCompletionHandler completionHandler = ^(bool granted, CFErrorRef error) {
@@ -54,7 +56,6 @@
     };
     
     ABAddressBookRequestAccessWithCompletion(self.addressBook,  completionHandler);
-
     
     [[NSNotificationCenter defaultCenter] addObserver: self
                                              selector: @selector(appDidBecomeActive)
@@ -62,6 +63,12 @@
                                                object: nil];
     
     [self adjustUI];
+    
+    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc]
+                                   initWithTarget:self
+                                   action:@selector(dismissKeyboard)];
+    tap.cancelsTouchesInView = NO;
+    [self.tableView addGestureRecognizer:tap];
 }
 
 
@@ -76,7 +83,7 @@
 {
     if (selectionImage)
     {
-        self.selectionImage = selectionImage;
+        _selectionImage = selectionImage;
     }
 }
 
@@ -117,7 +124,7 @@
 {
     if (!self.selectionImage)
     {
-        _selectionImage = [UIImage imageNamed:@"defaultSelectionImage.png"];
+        self.selectionImage = [UIImage imageNamed:@"defaultSelectionImage.png"];
     }
 }
 
@@ -126,11 +133,6 @@
 - (NSInteger)tableView: (UITableView *)tableView
  numberOfRowsInSection: (NSInteger)section
 {
-    if (tableView == self.tableView)
-    {
-        return self.contactsData.count;
-    }
-    
     return self.filteredContactsData.count;
 }
 
@@ -147,36 +149,36 @@
                                       reuseIdentifier: cellIdentifier];
     }
     ABRecordRef person;
-    if (tableView == self.tableView)
-    {
-        person = (__bridge ABRecordRef)(self.contactsData[indexPath.row]);
-    }
-    else
-    {
-        person = (__bridge ABRecordRef)(self.filteredContactsData[indexPath.row]);
-    }
+    person = (__bridge ABRecordRef)(self.filteredContactsData[indexPath.row]);
     
     NSString *fullName = [self fullNameOfPerson: person];
     cell.textLabel.text = fullName;
-
+    if ([fullName isEqualToString: kNoNameString])
+    {
+        cell.textLabel.textColor = [UIColor grayColor];
+        [cell.textLabel setFont:[UIFont italicSystemFontOfSize:16.0]];
+    }
+    else
+    {
+        cell.textLabel.textColor = [UIColor blackColor];
+        [cell.textLabel setFont:[UIFont systemFontOfSize:16.0]];
+        
+    }
     BOOL isChecked = [self.selectedContactsData containsObject: (__bridge id)(person)];
-    UIImage *image = isChecked ? self.selectionImage : nil;
+    UIImage *image = isChecked ? [UIImage imageNamed:@"checked"] : nil;
     
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-    CGRect frame = CGRectMake(0.0, 0.0, 30, 30);
+    CGRect frame = CGRectMake(0.0,
+                              0.0,
+                              30.0,
+                              30.0);
     button.frame = frame;
-    
-    [button setBackgroundImage: image
-                      forState: UIControlStateNormal];
-    
-    // set the button's target so we can interpret touch events and map that to a NSIndexSet
-    [button addTarget: self
-               action: @selector( checkButtonTapped: event: )
-     forControlEvents: UIControlEventTouchUpInside];
+    UIImageView *imageView = [[UIImageView alloc]initWithFrame:frame];
+    [imageView setImage:image];
     
     cell.backgroundColor = [UIColor clearColor];
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
-    cell.accessoryView = button;
+    cell.accessoryView = imageView;
     
     return cell;
 }
@@ -193,7 +195,7 @@
 {
     NSSet *touches = [event allTouches];
     UITouch *touch = [touches anyObject];
-    CGPoint currentTouchPosition = [touch locationInView:self.tableView];
+    CGPoint currentTouchPosition = [touch locationInView: self.tableView];
     
     NSIndexPath *indexPath = [self.tableView indexPathForRowAtPoint: currentTouchPosition];
     if (indexPath != nil)
@@ -204,27 +206,18 @@
 
 - (void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath
 {
-    UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
-    NSString *key = cell.textLabel.text;
-    BOOL checked = [self.items[key] boolValue];
-    self.items[key] = @(!checked);
+    UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
     
+    ABRecordRef personRecord = (__bridge ABRecordRef)(self.filteredContactsData[indexPath.row]);
     
-    UIButton *button = (UIButton *)cell.accessoryView;
+    BOOL checked = [self.selectedContactsData containsObject: (__bridge id)(personRecord)];
+    UIImage *newImage = (checked) ? [UIImage imageNamed:@"unchecked"] : [UIImage imageNamed:@"checked"];
     
-    UIImage *newImage = (checked) ? [UIImage imageNamed:@"unchecked"] : self.selectionImage;
-    
-    [button setBackgroundImage:newImage forState:UIControlStateNormal];
+    UIImageView * imageView = (UIImageView *)cell.accessoryView;
+    [imageView setImage: newImage];
     
     id person  = nil;
-    if (tableView == self.tableView)
-    {
-        person = self.contactsData[indexPath.row];
-    }
-    else
-    {
-        person = self.filteredContactsData[indexPath.row];
-    }
+    person = self.filteredContactsData[indexPath.row];
     
     if (!checked)
     {
@@ -234,30 +227,66 @@
     {
         [self.selectedContactsData removeObject:person];
     }
-
+    
 }
 
+#pragma mark - UISearchBarDelegate -
 
-
-#pragma mark - UISearchDisplayDelegate -
-
--(BOOL)searchDisplayController:       (UISearchDisplayController *)controller
-shouldReloadTableForSearchString: (NSString *)searchString
+-(void)searchBarTextDidEndEditing:(UISearchBar *)searchBar
 {
+    [self.searchBar resignFirstResponder];
+    [self.view endEditing:YES];
+    
+}
+
+- (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar
+{
+    
+    [self.searchBar resignFirstResponder];
+    
+}
+
+- (void)searchBarCancelButtonClicked:(UISearchBar *) searchBar
+{
+    
+    [self.searchBar resignFirstResponder];
+    
+}
+
+- (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText
+{
+    if ([searchText isEqualToString:@""])
+    {
+        [self revertToBeginState];
+        return;
+    }
+    
     [self.filteredContactsData removeAllObjects];
     for (id personObject in self.contactsData)
     {
         ABRecordRef person = (__bridge ABRecordRef)(personObject);
         NSString* fullName = [self fullNameOfPerson: person];
         
-        if ([fullName rangeOfString: searchString
+        if ([fullName rangeOfString: searchText
                             options: NSCaseInsensitiveSearch].location != NSNotFound)
         {
             [self.filteredContactsData addObject: personObject];
         }
     }
     
-    return YES;
+    [self.tableView reloadData];
+}
+
+- (void)revertToBeginState
+{
+    
+    [self.filteredContactsData removeAllObjects];
+    [self.filteredContactsData addObjectsFromArray: self.contactsData];
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.tableView reloadData];
+    });
+    [self dismissKeyboard];
 }
 
 #pragma mark - Getters -
@@ -290,10 +319,15 @@ shouldReloadTableForSearchString: (NSString *)searchString
     self.contactsData = (__bridge NSArray*)people;
     [self sortContactsArray];
     
-    [self.tableView reloadData];
+    [self revertToBeginState];
 }
 
 #pragma mark - Helpers -
+
+- (void) dismissKeyboard
+{
+    [self.searchBar resignFirstResponder];
+}
 
 - (NSString *) fullNameOfPerson:(ABRecordRef)person
 {
@@ -350,6 +384,11 @@ shouldReloadTableForSearchString: (NSString *)searchString
 - (void)appDidBecomeActive
 {
     [self requestData];
+}
+
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver: self];
 }
 
 @end
