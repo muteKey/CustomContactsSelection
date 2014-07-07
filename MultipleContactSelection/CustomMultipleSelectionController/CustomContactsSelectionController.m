@@ -117,7 +117,7 @@
 {
     if (!self.selectionImage)
     {
-        self.selectionImage = [UIImage imageNamed:@"defaultSelectionImage.png"];
+        _selectionImage = [UIImage imageNamed:@"defaultSelectionImage.png"];
     }
 }
 
